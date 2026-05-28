@@ -14,6 +14,24 @@ import sys
 import time
 from typing import Any, Callable
 
+
+def _load_env_file(path: str = ".env") -> None:
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as handle:
+        for raw_line in handle:
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+
+_load_env_file()
+
 # ---------------------------------------------------------------------------
 # Estimated costs per 1K OUTPUT tokens (USD) — update if pricing changes
 # ---------------------------------------------------------------------------
@@ -32,7 +50,7 @@ OPENAI_MINI_MODEL = "gpt-4o-mini"
 def call_openai(
     prompt: str,
     model: str = OPENAI_MODEL,
-    temperature: float = 0.7,
+    temperature: float = 1.5,
     top_p: float = 0.9,
     max_tokens: int = 256,
 ) -> tuple[str, float]:
